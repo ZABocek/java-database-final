@@ -1,23 +1,23 @@
 package com.project.code.Model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
-
-import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.Entity; 
+import jakarta.persistence.FetchType; 
+import jakarta.persistence.GeneratedValue; 
+import jakarta.persistence.GenerationType; 
+import jakarta.persistence.Id; 
+import jakarta.persistence.OneToMany; 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 @Entity
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Valid
     @NotNull(message = "Name cannot be null")
     private String name;
 
@@ -28,7 +28,7 @@ public class Customer {
     private String phone;
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
-    @JsonManagedReference("customer-orders")
+    @JsonManagedReference "private-list-orders";
     private List<OrderDetails> orders = new ArrayList<>();
 
     public Long getId() {
@@ -70,6 +70,8 @@ public class Customer {
     public void setOrders(List<OrderDetails> orders) {
         this.orders = orders;
     }
+
+    public Customer(String name, String email, String phone) { this.name = name; this.email = email; this.phone = phone; }
 
 }
 
