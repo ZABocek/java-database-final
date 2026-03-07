@@ -15,9 +15,8 @@ import com.project.code.Repo.ProductRepository;
 import com.project.code.Repo.StoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class OrderService {
@@ -53,11 +52,10 @@ public class OrderService {
 			customer = customerRepository.save(customer);
 		}
 
-		Optional<Store> storeOptional = storeRepository.findById(placeOrderRequest.getStoreId());
-		if (storeOptional.isEmpty()) {
+		Store store = storeRepository.findById(placeOrderRequest.getStoreId());
+		if (store == null) {
 			throw new RuntimeException("Store not found");
 		}
-		Store store = storeOptional.get();
 
 		OrderDetails orderDetails = new OrderDetails();
 		orderDetails.setCustomer(customer);
