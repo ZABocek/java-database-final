@@ -1,16 +1,15 @@
 package com.project.code.Model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+
+import jakarta.persistence.Entity; 
+import jakarta.persistence.GeneratedValue; 
+import jakarta.persistence.GenerationType; 
+import jakarta.persistence.Id; 
+import jakarta.persistence.JoinColumn; 
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "inventory")
 public class Inventory {
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,6 +67,11 @@ public class Inventory {
    public void setStockLevel(Integer stockLevel) {
       this.stockLevel = stockLevel;
    }
+
+   public String toString() { 
+      return "Inventory{" + "id=" + id + ", product=" + 
+         (product != null ? product.getId() : "null") + ", store=" + 
+         (store != null ? store.getId() : "null") + ", stockLevel=" + stockLevel + '}'; } 
 
 }
 
