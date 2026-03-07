@@ -1,126 +1,132 @@
 package com.project.code.Controller;
 
-import com.project.code.Model.Product;
-import com.project.code.Repo.InventoryRepository;
-import com.project.code.Repo.ProductRepository;
-import com.project.code.Service.ServiceClass;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.HashMap; 
+import java.util.List; 
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.dao.DataIntegrityViolationException; 
+import org.springframework.web.bind.annotation.DeleteMapping; 
+import org.springframework.web.bind.annotation.GetMapping; 
+import org.springframework.web.bind.annotation.PathVariable; 
+import org.springframework.web.bind.annotation.PostMapping; 
+import org.springframework.web.bind.annotation.PutMapping; 
+import org.springframework.web.bind.annotation.RequestBody; 
+import org.springframework.web.bind.annotation.RequestMapping; 
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.project.code.Model.Product; 
+import com.project.code.Repo.InventoryRepository; 
+import com.project.code.Repo.OrderItemRepository; 
+import com.project.code.Repo.ProductRepository; 
+import com.project.code.Service.ServiceClass;
 
 @RestController
 @RequestMapping("/product")
 public class ProductController {
-	@Autowired
+	@Autowired 
 	private ProductRepository productRepository;
 
-	@Autowired
+	@Autowired 
+	private OrderItemRepository orderItemRepository;
+
+	@Autowired 
 	private ServiceClass serviceClass;
 
-	@Autowired
+	@Autowired 
 	private InventoryRepository inventoryRepository;
 
-	@PostMapping
+	@PostMapping 
 	public Map<String, String> addProduct(@RequestBody Product product) {
-		Map<String, String> response = new HashMap<>();
-		try {
-			if (!serviceClass.validateProduct(product)) {
-				response.put("message", "Product already present in database");
-				return response;
-			}
-			productRepository.save(product);
-			response.put("message", "Product saved successfully");
-		} catch (DataIntegrityViolationException e) {
-			response.put("message", "Product could not be saved due to data constraints");
-		} catch (Exception e) {
-			response.put("message", e.getMessage());
+
+		Map<String, String> map = new HashMap<>(); 
+		if (!serviceClass.validateProduct(product)) { 
+			map.put("message", "Product already present in database"); 
+			return map; } 
+		try { 
+			productRepository.save(product); 
+			map.put("message", "Product added successfully"); }
+
+		catch (DataIntegrityViolationException e) { 
+			map.put("message", "SKU should be unique"); } 
+		return map; 
+	}
+
+	@GetMapping("/product/{id}") 
+	public Map<String, Object> getProductbyId(@PathVariable Long id) { 
+		System.out.println("result: "); 
+		System.out.println("result: "); 
+		System.out.println("result: "); 
+		Map<String, Object> map = new HashMap<>(); 
+		Product result = productRepository.findByid(id);
+
+		System.out.println("result: "+result); 
+		map.put("products", result); 
+		return map; 
+	}
+
+	@PutMapping 
+	public Map<String, String> updateProduct(@RequestBody Product product) { 
+		Map<String, String> map = new HashMap<>(); 
+		try { 
+			productRepository.save(product); 
+			map.put("message", "Data upated sucessfully"); 
+		} 
+		catch (Error e) { 
+			map.put("message", "Error occured"); 
 		}
-		return response;
+
+		return map; 
 	}
 
-	@GetMapping("/product/{id}")
-	public Map<String, Object> getProductbyId(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		response.put("products", productRepository.findByid(id));
-		return response;
+	@GetMapping("/category/{name}/{category}") 
+	public Map<String, Object> filterbyCategoryProduct(@PathVariable String name,@PathVariable String category) { 
+		Map<String, Object> map = new HashMap<>();
+
+		if(name.equals("null")) { 
+			map.put("products", productRepository.findByCategory(category)); 
+			return map; } 
+		else if(category.equals("null")) { 
+			map.put("products", productRepository.findProductBySubName(name)); 
+			return map;
+		} 
+		map.put("products",productRepository.findProductBySubNameAndCategory(name,category)); 
+		return map;
 	}
 
-	@PutMapping
-	public Map<String, String> updateProduct(@RequestBody Product product) {
-		Map<String, String> response = new HashMap<>();
-		try {
-			productRepository.save(product);
-			response.put("message", "Successfully updated product");
-		} catch (Exception e) {
-			response.put("message", e.getMessage());
-		}
-		return response;
-	}
-
-	@GetMapping("/category/{name}/{category}")
-	public Map<String, Object> filterbyCategoryProduct(@PathVariable String name, @PathVariable String category) {
-		Map<String, Object> response = new HashMap<>();
-		List<Product> products;
-		if ("null".equalsIgnoreCase(name) && "null".equalsIgnoreCase(category)) {
-			products = productRepository.findAll();
-		} else if ("null".equalsIgnoreCase(name)) {
-			products = productRepository.findByCategory(category);
-		} else if ("null".equalsIgnoreCase(category)) {
-			products = productRepository.findProductBySubName(name);
-		} else {
-			products = productRepository.findProductBySubNameAndCategory(name, category);
-		}
-		response.put("products", products);
-		return response;
-	}
-
-	@GetMapping
+	@GetMapping 
 	public Map<String, Object> listProduct() {
-		Map<String, Object> response = new HashMap<>();
-		response.put("products", productRepository.findAll());
-		return response;
+		Map<String, Object> map = new HashMap<>(); 
+		map.put("products",productRepository.findAll()); 
+		return map; 
 	}
 
-	@GetMapping("filter/{category}/{storeid}")
-	public Map<String, Object> getProductbyCategoryAndStoreId(@PathVariable String category, @PathVariable Long storeid) {
-		Map<String, Object> response = new HashMap<>();
-		response.put("product", productRepository.findProductByCategory(category, storeid));
-		return response;
+	@GetMapping("filter/{category}/{storeid}") 
+	public Map<String, Object> getProductbyCategoryAndStoreId(@PathVariable String category,@PathVariable long storeid) { 
+		Map<String, Object> map = new HashMap<>(); 
+		List result = productRepository.findProductByCategory(category,storeid);
+		map.put("product", result); 
+		return map; 
 	}
 
-	@DeleteMapping("/{id}")
-	public Map<String, String> deleteProduct(@PathVariable Long id) {
-		Map<String, String> response = new HashMap<>();
-		if (!serviceClass.ValidateProductId(id)) {
-			response.put("message", "Product not present in database");
-			return response;
-		}
-
-		inventoryRepository.deleteByProductId(id);
+	@DeleteMapping("/{id}") 
+	public Map<String, String> deleteProduct(@PathVariable Long id) { 
+		Map<String, String> map = new HashMap<>();
+		if (!serviceClass.ValidateProductId(id)) { 
+			map.put("message", "Id " + id + " not present in database"); 
+			return map; } 
+		inventoryRepository.deleteByProductId(id); 
+		orderItemRepository.deleteByProductId(id); 
 		productRepository.deleteById(id);
-		response.put("message", "Successfully deleted product");
-		return response;
+		map.put("message", "Deleted product successfully with id: " + id); 
+		return map; 
+	}
+	
+	@GetMapping("/searchProduct/{name}") 
+	public Map<String, Object> searchProduct(@PathVariable String name) { 
+		Map<String, Object> map = new HashMap<>(); 
+		map.put("products", productRepository.findProductBySubName(name)); 
+		return map; 
 	}
 
-	@GetMapping("/searchProduct/{name}")
-	public Map<String, Object> searchProduct(@PathVariable String name) {
-		Map<String, Object> response = new HashMap<>();
-		response.put("products", productRepository.findProductBySubName(name));
-		return response;
-	}
-
-
-  
-    
 }
